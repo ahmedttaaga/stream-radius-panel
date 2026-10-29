@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>حسابي</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@600;800&display=swap">
+<style>
+:root { --p: #4f46e5; --g: #10b981; --r: #f43f5e; --a: #f59e0b; --t: #0f172a; --m: #64748b; --l: #e2e8f0; --bg: #f8fafc; --c: #fff; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--t); font-family: "Cairo", Tahoma, sans-serif; font-size: 15px; }
+.wrap { max-width: 560px; margin: 0 auto; padding: 16px; display: grid; gap: 14px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.15rem; }
+.brand .lg { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #4f46e5, #06b6d4); color: #fff; display: grid; place-items: center; font-size: 20px; }
+.card { background: var(--c); border: 1px solid var(--l); border-radius: 16px; padding: 16px; }
+.card h3 { margin: 0 0 10px; font-size: 1rem; display: flex; align-items: center; gap: 8px; } .card h3 i { color: var(--p); }
+label { display: grid; gap: 4px; font-weight: 700; font-size: 13px; color: #475569; margin-bottom: 10px; }
+input { font: inherit; padding: 11px 12px; border: 1px solid #cbd5e1; border-radius: 10px; width: 100%; background: #fff; color: var(--t); }
+button { font: inherit; font-weight: 700; border: 0; border-radius: 10px; padding: 11px 14px; cursor: pointer; background: var(--p); color: #fff; width: 100%; }
+button.ghost { background: #f1f5f9; color: #334155; } button.green { background: var(--g); } button.amber { background: var(--a); }
+button:disabled { opacity: .55; cursor: not-allowed; }
+.err { color: var(--r); font-weight: 700; min-height: 1.2em; } .ok { color: #047857; font-weight: 700; }
+.hint { background: #eef2ff; color: #3730a3; border: 1px solid #c7d2fe; border-radius: 10px; padding: 10px 12px; font-size: 13.5px; }
+.warn { background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; border-radius: 12px; padding: 12px 14px; font-weight: 700; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; } .kv div:nth-child(odd) { color: var(--m); font-size: 13px; } .kv div:nth-child(even) { font-weight: 700; }
+.big { font-family: "Inter", "Cairo", sans-serif; font-weight: 800; font-size: 1.9rem; }
+.pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.on { background: #ecfdf5; color: #065f46; } .off { background: #f1f5f9; color: #475569; } .bad { background: #fff1f2; color: #9f1239; }
+.bar { height: 10px; background: #e2e8f0; border-radius: 10px; overflow: hidden; margin: 8px 0; } .bar i { display: block; height: 100%; background: var(--p); }
+.row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center; } .row b { display: block; font-family: "Inter", "Cairo"; font-size: 1.05rem; } .row small { color: var(--m); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; } td, th { padding: 7px 6px; border-bottom: 1px solid #f1f5f9; text-align: right; } th { color: var(--m); font-weight: 700; }
+.top { display: flex; justify-content: space-between; align-items: center; } .top button { width: auto; padding: 8px 12px; }
+.hidden { display: none !important; } .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.muted { color: var(--m); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div class="brand"><span class="lg"><i class="bi bi-wifi"></i></span><span id="company">حسابي</span></div>
+    <button class="ghost hidden" id="logout"><i class="bi bi-box-arrow-right"></i> خروج</button></div>
+  <div id="expiredBanner" class="warn hidden"><i class="bi bi-exclamation-triangle-fill"></i> <span id="expiredText"></span></div>
+  <div id="announce" class="hint hidden"></div>
+
+  <form id="loginView" class="card hidden">
+    <h3><i class="bi bi-person-circle"></i> دخول المشترك</h3>
+    <div id="suggest" class="hint hidden" style="margin-bottom:10px"></div>
+    <label>اسم المستخدم أو رقم الموبايل<input name="username" autocomplete="username" required dir="ltr"></label>
+    <label>كلمة السر (نفس كلمة سر الراوتر / PPPoE)<input name="password" type="password" autocomplete="current-password" required dir="ltr"></label>
+    <button><i class="bi bi-box-arrow-in-left"></i> دخول</button>
+    <div class="err" id="loginErr"></div>
+    <p class="muted" id="contact"></p>
+  </form>
+
+  <div id="meView" class="hidden" style="display:grid;gap:14px"></div>
+</div>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const fmt = n => Number(n || 0).toLocaleString("en-US", { maximumFractionDigits: 2 });
+const gb = mb => (Number(mb || 0) / 1024).toFixed(2);
+const bgb = b => (Number(b || 0) / 1073741824).toFixed(2);
+async function api(path, opt = {}) {
+  const r = await fetch("/api/portal/" + path, { method: opt.method || "GET", headers: { "X-Requested-With": "rm", "Content-Type": "application/json" }, credentials: "same-origin", body: opt.body ? JSON.stringify(opt.body) : undefined });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) { const e = new Error(d.error || "حصل خطأ"); e.code = r.status; throw e; }
+  return d;
+}
+const isExpiredPage = location.pathname.startsWith("/expired");
+function left(exp) {
+  if (!exp) return "—";
+  const ms = new Date(exp.replace(" ", "T")) - new Date();
+  const abs = Math.abs(ms), d = Math.floor(abs / 864e5), h = Math.floor(abs % 864e5 / 36e5), m = Math.floor(abs % 36e5 / 6e4);
+  const t = d ? `${d} يوم و ${h} ساعة` : h ? `${h} ساعة و ${m} دقيقة` : `${m} دقيقة`;
+  return ms >= 0 ? "باقي " + t : "منتهي من " + t;
+}
+async function showLogin() {
+  $("#meView").classList.add("hidden"); $("#logout").classList.add("hidden"); $("#loginView").classList.remove("hidden");
+  try {
+    const d = await api("login");
+    if (d.company) $("#company").textContent = d.company;
+    if (d.announce) { $("#announce").textContent = d.announce; $("#announce").classList.remove("hidden"); }
+    if (d.phone) $("#contact").innerHTML = `للمساعدة: <a href="tel:${esc(d.phone)}">${esc(d.phone)}</a>`;
+    if (d.suggest) {
+      $("#suggest").innerHTML = `<i class="bi bi-router"></i> الخط ده عليه الحساب <b dir="ltr">${esc(d.suggest)}</b> — اكتب كلمة السر بس.`;
+      $("#suggest").classList.remove("hidden"); $("#loginView").username.value = d.suggest;
+      if (isExpiredPage) { $("#expiredText").textContent = "خدمتك متوقفة (الاشتراك أو الكوتة خلص). سجل دخول علشان تجدد أو تاخد سلفة."; $("#expiredBanner").classList.remove("hidden"); }
+    }
+  } catch (e) { $("#loginErr").textContent = e.message; }
+}
+$("#loginView").onsubmit = async e => {
+  e.preventDefault(); $("#loginErr").textContent = "";
+  const f = e.target;
+  try { await api("login", { method: "POST", body: { Username: f.username.value, Password: f.password.value } }); f.password.value = ""; load(); }
+  catch (er) { $("#loginErr").textContent = er.message; }
+};
+$("#logout").onclick = async () => { await api("logout", { method: "POST" }).catch(() => {}); showLogin(); };
+
+async function load() {
+  let d;
+  try { d = await api("me"); } catch (e) { if (e.code === 401) return showLogin(); $("#loginErr").textContent = e.message; return showLogin(); }
+  const s = d.me, quota = +s.quota_mb, used = +s.used_mb, pct = quota > 0 ? Math.min(100, used * 100 / quota) : 0;
+  const expired = !s.expiration || new Date(s.expiration.replace(" ", "T")) < new Date();
+  const quotaDone = quota > 0 && used >= quota;
+  if (d.company) $("#company").textContent = d.company;
+  if (d.announce) { $("#announce").textContent = d.announce; $("#announce").classList.remove("hidden"); }
+  $("#loginView").classList.add("hidden"); $("#logout").classList.remove("hidden");
+  if (expired || quotaDone || +s.enabled === 0) {
+    $("#expiredText").textContent = +s.enabled === 0 ? "حسابك موقوف — كلّم الدعم." : expired ? "اشتراكك منتهي. جدد من رصيدك أو خد سلفة يومين." : "الكوتة بتاعتك خلصت. جدد علشان ترجع السرعة الكاملة.";
+    $("#expiredBanner").classList.remove("hidden");
+  } else $("#expiredBanner").classList.add("hidden");
+  const canRenew = d.allow.renew && +s.money >= +s.price && +s.price > 0;
+  const canAdvance = d.allow.advance && expired && !+s.advance_open && +s.enabled === 1;
+  const usage = d.usage || [];
+  $("#meView").innerHTML = `
+    <div class="card"><h3><i class="bi bi-person-badge"></i> ${esc(s.name.trim() || s.username)} <span class="pill ${+s.online ? "on" : "off"}">${+s.online ? "متصل" : "مش متصل"}</span></h3>
+      <div class="kv"><div>اسم المستخدم</div><div dir="ltr" style="text-align:right">${esc(s.username)}</div><div>الباقة</div><div>${esc(s.profile || "—")}</div>
+        <div>السعر</div><div>${fmt(s.price)} جنيه</div><div>ينتهي</div><div>${esc(s.expiration || "—")} <span class="pill ${expired ? "bad" : "on"}">${left(s.expiration)}</span></div>
+        ${s.manager ? `<div>الموزّع</div><div>${esc(s.manager)} ${s.manager_phone ? `<a href="tel:${esc(s.manager_phone)}" dir="ltr">${esc(s.manager_phone)}</a>` : ""}</div>` : ""}</div></div>
+    <div class="card"><h3><i class="bi bi-pie-chart-fill"></i> الكوتة</h3>
+      ${quota > 0 ? `<div class="big" style="color:${pct > 85 ? "var(--r)" : pct > 70 ? "var(--a)" : "var(--p)"}">${pct.toFixed(0)}%</div><div class="bar"><i style="width:${pct}%;background:${pct > 85 ? "var(--r)" : pct > 70 ? "var(--a)" : "var(--p)"}"></i></div>
+        <div class="row"><div><b>${gb(quota)}</b><small>الإجمالي (جيجا)</small></div><div><b>${gb(used)}</b><small>المستخدم</small></div><div><b style="color:${quota - used < 5120 ? "var(--r)" : "inherit"}">${gb(Math.max(0, quota - used))}</b><small>الباقي</small></div></div>`
+        : `<div class="big">∞</div><p class="muted">الباقة من غير حد كوتة.</p>`}
+      ${usage.length ? `<table style="margin-top:10px"><tr><th>اليوم</th><th>تحميل</th><th>رفع</th></tr>${usage.map(u => `<tr><td>${esc(u.day)}</td><td>${bgb(u.down)} GB</td><td>${bgb(u.up)} GB</td></tr>`).join("")}</table>` : ""}</div>
+    <div class="card"><h3><i class="bi bi-wallet2"></i> رصيدك</h3>
+      <div class="grid2"><div><div class="muted">الرصيد</div><div class="big">${fmt(s.money)}</div></div><div><div class="muted">عليك</div><div class="big" style="color:${+s.debt > 0 ? "var(--r)" : "var(--g)"}">${+s.debt > 0 ? fmt(s.debt) : "0 ✓"}</div></div></div>
+      ${d.allow.renew ? `<button class="green" id="renew" ${canRenew ? "" : "disabled"} style="margin-top:12px"><i class="bi bi-arrow-repeat"></i> جدد من رصيدك (${fmt(s.price)} جنيه)</button>
+        ${canRenew ? "" : `<p class="muted">${+s.price > 0 ? "رصيدك مش كفاية للتجديد — اشحن من الموزّع." : ""}</p>`}` : ""}
+      ${d.allow.advance ? `<button class="amber" id="advance" ${canAdvance ? "" : "disabled"} style="margin-top:8px"><i class="bi bi-hourglass-split"></i> خد سلفة يومين</button>
+        <p class="muted">السلفة للمنتهي بس، يومين، وبتتخصم من التجديد الجاي.${+s.advance_open ? " <b>عندك سلفة لسه ما اتخصمتش.</b>" : ""}</p>` : ""}
+      <div id="actMsg"></div>
+      ${d.live ? "" : `<p class="muted"><i class="bi bi-info-circle"></i> التجديد والسلفة من هنا هيشتغلوا بعد نقل الخدمة للسيستم الجديد.</p>`}</div>
+    ${(d.invoices || []).length ? `<div class="card"><h3><i class="bi bi-receipt"></i> آخر العمليات</h3><table><tr><th>التاريخ</th><th>العملية</th><th>المبلغ</th></tr>
+      ${d.invoices.map(i => `<tr><td>${esc(String(i.created).slice(0, 10))}</td><td>${esc({ renew: "تجديد", renew_cash: "تجديد من الرصيد", auto_renew: "تجديد تلقائي", advance: "سلفة", cash_in: "إيداع", cash_out: "سحب", add_time: "إضافة وقت", part_pay: "دفع جزئي", quota: "كوتة" }[i.operation] || i.operation)}</td>
+      <td>${fmt(i.amount)} ${+i.paid ? "" : '<span class="pill bad">غير مدفوع</span>'}</td></tr>`).join("")}</table></div>` : ""}
+    ${d.allow.password ? `<form class="card" id="pwForm"><h3><i class="bi bi-key-fill"></i> تغيير كلمة السر</h3>
+      <label>كلمة السر الحالية<input name="old" type="password" required dir="ltr" autocomplete="current-password"></label>
+      <label>كلمة السر الجديدة (6 حروف على الأقل)<input name="new1" type="password" required minlength="6" dir="ltr" autocomplete="new-password"></label>
+      <label>تأكيدها<input name="new2" type="password" required minlength="6" dir="ltr" autocomplete="new-password"></label>
+      <p class="muted"><i class="bi bi-exclamation-circle"></i> بعد التغيير لازم تكتبها في الراوتر بتاعك، وإلا النت هيقف.</p>
+      <button class="ghost">غيّر كلمة السر</button><div id="pwMsg"></div></form>` : ""}
+    ${d.phone ? `<p class="muted" style="text-align:center">الدعم: <a href="tel:${esc(d.phone)}">${esc(d.phone)}</a></p>` : ""}`;
+  $("#meView").classList.remove("hidden");
+  const doAct = async (body, msgEl, confirmTxt) => {
+    if (confirmTxt && !confirm(confirmTxt)) return;
+    msgEl.className = ""; msgEl.textContent = "...";
+    try { const r = await api("action", { method: "POST", body }); msgEl.className = "ok"; msgEl.textContent = r.note || "تمام"; setTimeout(load, 1500); }
+    catch (e) { msgEl.className = "err"; msgEl.textContent = e.message; }
+  };
+  if ($("#renew")) $("#renew").onclick = () => doAct({ Action: "renew" }, $("#actMsg"), `هيتخصم ${fmt(s.price)} جنيه من رصيدك ويتجدد اشتراكك. تأكيد؟`);
+  if ($("#advance")) $("#advance").onclick = () => doAct({ Action: "advance" }, $("#actMsg"), "هتاخد يومين سلفة، وهيتخصموا من التجديد الجاي. تأكيد؟");
+  if ($("#pwForm")) $("#pwForm").onsubmit = e => {
+    e.preventDefault(); const f = e.target;
+    if (f.new1.value !== f.new2.value) { $("#pwMsg").className = "err"; $("#pwMsg").textContent = "التأكيد مش زي الجديدة"; return; }
+    doAct({ Action: "password", Old: f.old.value, New: f.new1.value }, $("#pwMsg"));
+  };
+}
+load();
+</script>
+</body>
+</html>

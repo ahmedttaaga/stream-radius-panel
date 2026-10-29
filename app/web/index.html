@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stream-Net | الرئيسية</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div id="login" class="login hidden">
+  <form id="loginForm" class="login-box">
+    <h1 id="loginCompany">Stream-Net</h1>
+    <p>نظام إدارة المشتركين</p>
+    <input name="username" placeholder="اسم المستخدم" autocomplete="username" required>
+    <input name="password" type="password" placeholder="كلمة المرور" autocomplete="current-password" required>
+    <button>دخول</button>
+    <div id="loginErr" class="err"></div>
+    <a class="lang-link" data-noi18n onclick="setLang(LANG === 'en' ? 'ar' : 'en')">English / عربي</a>
+  </form>
+</div>
+
+<div id="app" class="hidden">
+  <aside id="sidebar">
+    <div class="brand" id="brand">Stream-Net</div>
+    <nav id="menu"></nav>
+  </aside>
+  <header id="topbar">
+    <button id="burger" class="icon-btn" title="القائمة"><i class="fa fa-bars"></i></button>
+    <span id="modeBadge" class="mode"></span>
+    <span class="spacer"></span>
+    <button id="langBtn" class="icon-btn lang-btn" title="Language" data-noi18n onclick="setLang(LANG === 'en' ? 'ar' : 'en')"></button>
+    <span class="user"><i class="fa fa-user-circle"></i> <span id="who"></span></span>
+    <button id="logout" class="icon-btn" title="خروج"><i class="fa fa-sign-out"></i></button>
+  </header>
+  <main id="content"></main>
+</div>
+
+<div id="modal" class="modal hidden"><div class="modal-box"><button class="modal-x" data-close>&times;</button><div id="modalBody"></div></div></div>
+<div id="toast" class="toast hidden"></div>
+<script src="i18n-en.js"></script>
+<script src="i18n.js"></script>
+<script src="demo.js"></script><!-- demo mode (file:// or ?demo or no server): fake /api answers; must load before app.js, which calls boot() at once -->
+<script src="app.js"></script>
+<script src="userops.js"></script>
+<script src="subscribers.js"></script>
+<script src="user.js"></script>
+<script src="profiles.js"></script>
+<script src="managers.js"></script>
+<script src="cards.js"></script>
+<script src="nas.js"></script>
+<script src="reports.js"></script>
+<script src="online.js"></script>
+<script src="tickets.js"></script>
+<script src="dashboard.js"></script>
+<script src="charge.js"></script>
+<script src="messaging.js"></script>
+<script src="settings2.js"></script>
+<script src="settings.js"></script>
+<script src="extras.js"></script>
+<script src="bandwidth.js"></script>
+<script src="onlinemgr.js"></script>
+<script src="perms.js"></script>
+<script src="extras2.js"></script>
+<script src="tools.js"></script>
+<script src="charts.js"></script>
+<script src="speed.js"></script>
+<script src="cardtpl.js"></script>
+<script src="vpn.js"></script>
+<script src="cafe.js"></script>
+<script src="cash.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+</body>
+</html>
